@@ -3,6 +3,8 @@ library(tidyverse)
 library(xts)
 library(dygraphs)
 
+options(stringsAsFactors = F, digits = 2)
+
 function(input, output) {
   
   df <- reactive({
@@ -23,6 +25,7 @@ function(input, output) {
   })
   
   output$pie <- plotly::renderPlotly({
+                                     
     plotly::plot_ly() %>% 
       plotly::add_pie(data = df(), labels = ~Тематика, values = ~`Объём фонда`,
                       name = "Фонд", domain = list(row = 0, column = 0)) %>% 
@@ -32,13 +35,16 @@ function(input, output) {
                      grid=list(rows=1, columns=2),
                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                     paper_bgcolor = 'transparent')
+                     paper_bgcolor = "transparent")
   })
   
   output$Coeff_table <- renderDataTable({
-    df() %>% mutate(`Коэффициент соответствия` =
+    
+    df <- df() %>% mutate(`Коэффициент соответствия` =
                       (Выдача / sum(Выдача, na.rm = T)) /
                       (`Объём фонда` / sum(`Объём фонда`, na.rm = T)))
+    
+    df
   })
   
   xts_full <- reactive({
@@ -161,7 +167,7 @@ function(input, output) {
   })
   output$dwn <- downloadHandler(
     filename = function() {
-      paste(input$pub, ".csv", sep = "")
+      paste(input$pub[1], ".csv", sep = "")
     },
     content = function(file) {
       write_excel_csv(data(), file, delim = "\t")

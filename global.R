@@ -4,6 +4,10 @@ library(xts)
 library(dygraphs)
 
 options(stringsAsFactors = F, digits = 2)
+
+### Global
+
+# Load fund and circulation data
 funds_leveled <- read_tsv("~/Comp_app/data/funds_leveled.csv")
 circulation <- read_tsv("~/Comp_app/data/circulation.csv")
 funds_leveled <- funds_leveled %>% select(-id) %>% 
@@ -48,10 +52,11 @@ funds_leveled <- funds_leveled %>% left_join(.,
 circulation_themed <- left_join(circulation, funds_leveled, by = "INVBAR") %>%
   filter(!is.na(date.y)) %>% select(-date.y)
 
-funds_pub <- read_tsv("~/Documents/Nekrasovka/funds/data/price.csv")
+funds_pub <- read_tsv("~/Comp_app/data/price.csv")
 
 publishers <- funds_pub %>% select(id, Publisher) %>% filter(!is.na(Publisher)) %>% filter(Publisher != "no $c") %>% 
-  distinct() %>% group_by(Publisher) %>% mutate(N = n()) %>% filter(N >= 10) %>% select(Publisher)
+  distinct() %>% group_by(Publisher) %>% mutate(N = n()) %>% filter(N >= 10) %>% select(Publisher) %>% 
+  distinct()
 
 funds_pub <- funds_pub %>% filter(Publisher %in% publishers$Publisher)
 
