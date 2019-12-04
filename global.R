@@ -3,30 +3,37 @@ library(tidyverse)
 library(xts)
 library(dygraphs)
 
-funds_leveled <- read_tsv("~/Documents/Nekrasovka/funds/data/funds_leveled.csv")
-circulation <- read_tsv("~/Documents/Nekrasovka/funds/data/circulation.csv")
+options(stringsAsFactors = F, digits = 2)
+funds_leveled <- read_tsv("~/Comp_app/data/funds_leveled.csv")
+circulation <- read_tsv("~/Comp_app/data/circulation.csv")
 funds_leveled <- funds_leveled %>% select(-id) %>% 
   gather(bar, inv, key = "type", value = "INVBAR") %>% select(-type)
 
 funds_leveled <- funds_leveled %>% distinct()
 
 funds_leveled <- funds_leveled %>% left_join(.,
-                                             data.frame(level_1 = funds_leveled$level_1 %>% unique(),
+                                             data.frame(level_1 = c("main", "missing", "regional", "rare", 
+                                                                    "digital", "microform"),
                                                         level_1_1 = c("Основной фонд", "Документ отстутсвует",
                                                                       "Фонд краеведения", "Редкий фонд",
                                                                       "Электронные ресурсы", "Микроформы")),
                                              by = "level_1") %>% select(date, level_1 = level_1_1, level_2, level_3,
                                                                         level_4, INVBAR) %>% 
   left_join(., data.frame(
-    level_2 = funds_leveled$level_2 %>% unique(),
+    level_2 = c("books and digital", "periodicals"),
     level_2_1 = c("Основной (5)", "Периодика (56)")
   ), by = "level_2") %>% select(date, level_1, level_2 = level_2_1, level_3, level_4, INVBAR) %>% 
   left_join(., data.frame(
-    level_3 = funds_leveled$level_3 %>% unique(),
+    level_3 = c("russian", "foreign", NA),
     level_3_1 = c("Русский", "Национальные и зарубежные языки", "Нет данных")
   ), by = "level_3") %>% select(date, level_1, level_2, level_3 = level_3_1, level_4, INVBAR) %>% 
   left_join(., data.frame(
-    level_4 = funds_leveled$level_4 %>% unique(),
+    level_4 = c("fiction", "psychology", "no data", "technology", "universal",
+                "economics", "sports", "history", "natural science", "medicine",
+                "education", "arts", "linguistics", "farming", "religion", "general", "folklore",
+                "law", "literary studies", "philosophy", "warfare", "recreation", "regional geography",
+                "libraries", "sociology", "museums", "politics", "culture", "science of science",
+                "media", "philology"),
     level_4_1 = c("Художественная литература", "Психология", "Нет данных",
                   "Техника и технические науки", "Универсальное содержание",
                   "Экономика", "Физическая культура и спорт", "История",
